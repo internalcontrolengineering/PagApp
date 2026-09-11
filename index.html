@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PagApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --negro: #1a1d21;
+      --negro-suave: #2a2e35;
+      --gris-oscuro: #3a3f47;
+      --gris-medio: #6b7280;
+      --gris-claro: #d1d5db;
+      --gris-fondo: #e5e7eb;
+      --gris-superficie: #f3f4f6;
+      --blanco: #ffffff;
+      --azul-acero: #4a5568;
+      --azul-acero-claro: #718096;
+      --verde-apagado: #38a169;
+      --verde-apagado-oscuro: #2f855a;
+      --rojo-apagado: #c53030;
+      --rojo-oscuro: #9b2c2c;
+      --amarillo: #d69e2e;
+      --texto: #1a1d21;
+      --texto-suave: #6b7280;
+      --fondo-2: #eef0f3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 14px;
+      color: var(--texto);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 820px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    /* ===== BRAND ===== */
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 6px 0 2px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      color: var(--blanco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      box-shadow:
+        0 6px 12px rgba(26, 29, 33, 0.25),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-name {
+      font-size: clamp(1.3rem, 3vw, 1.6rem);
+      font-weight: 900;
+      letter-spacing: -0.6px;
+      color: var(--negro);
+    }
+
+    .brand-name span { color: var(--verde-apagado); }
+
+    /* ===== TABS ===== */
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      background: var(--blanco);
+      border-radius: 18px;
+      box-shadow:
+        0 6px 16px rgba(26, 29, 33, 0.1),
+        inset 0 2px 4px rgba(255, 255, 255, 1);
+      overflow-x: auto;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabs-bar::-webkit-scrollbar { height: 5px; }
+    .tabs-bar::-webkit-scrollbar-thumb { background: var(--gris-claro); border-radius: 6px; }
+
+    .tab {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      border: none;
+      background: var(--fondo-2);
+      color: var(--texto-suave);
+      box-shadow:
+        inset 0 2px 4px rgba(26, 29, 33, 0.08),
+        inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      min-height: 36px;
+    }
+
+    .tab:hover { color: var(--texto); transform: translateY(-1px); }
+
+    .tab.activo {
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      color: var(--blanco);
+      box-shadow:
+        0 4px 10px rgba(26, 29, 33, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .tab .tab-close {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      padding: 2px 4px;
+      border-radius: 5px;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .tab .tab-close:hover {
+      background: rgba(197, 48, 48, 0.25);
+      color: #ff6b6b;
+      opacity: 1;
+    }
+
+    .tab.activo .tab-close:hover {
+      background: rgba(255, 107, 107, 0.3);
+      color: #ff8a8a;
+    }
+
+    .tab-rename-input {
+      background: var(--blanco);
+      border: 2px solid var(--gris-oscuro);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.8rem;
+      color: var(--texto);
+      outline: none;
+      width: 140px;
+      max-width: 100%;
+    }
+
+    /* ===== VISTA HOME ===== */
+    .proyectos-home {
+      background: var(--blanco);
+      border-radius: 26px;
+      width: 100%;
+      box-shadow:
+        0 20px 40px rgba(26, 29, 33, 0.15),
+        0 6px 12px rgba(26, 29, 33, 0.08),
+        inset 0 2px 4px rgba(255, 255, 255, 1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .home-header {
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      padding: clamp(18px, 3vw, 24px) clamp(18px, 3.5vw, 26px) clamp(14px, 2.5vw, 20px);
+      color: var(--blanco);
+      position: relative;
+      box-shadow:
+        inset 0 4px 8px rgba(255, 255, 255, 0.08),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .home-header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      border-radius: 2px;
+    }
+
+    .home-header h2 {
+      font-size: clamp(1.2rem, 3vw, 1.4rem);
+      font-weight: 900;
+      letter-spacing: -0.4px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .home-header p {
+      font-size: clamp(0.72rem, 1.6vw, 0.8rem);
+      font-weight: 600;
+      opacity: 0.65;
+    }
+
+    .home-body {
+      padding: clamp(16px, 3vw, 22px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn-crear-proyecto {
+      padding: 16px 20px;
+      border: 2px dashed var(--gris-claro);
+      border-radius: 16px;
+      background: var(--fondo-2);
+      color: var(--texto-suave);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+    }
+
+    .btn-crear-proyecto:hover {
+      border-color: var(--gris-oscuro);
+      color: var(--texto);
+      background: var(--blanco);
+      transform: translateY(-1px);
+    }
+
+    .proyectos-lista { display: flex; flex-direction: column; gap: 10px; }
+
+    .proyecto-item {
+      background: var(--blanco);
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow:
+        0 5px 12px rgba(26, 29, 33, 0.08),
+        0 2px 4px rgba(26, 29, 33, 0.05),
+        inset 0 1px 2px rgba(255, 255, 255, 1);
+      border: 1px solid rgba(26, 29, 33, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      animation: popIn 0.3s ease-out;
+      min-height: 64px;
+    }
+
+    .proyecto-item:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 16px rgba(26, 29, 33, 0.12),
+        0 3px 6px rgba(26, 29, 33, 0.08);
+    }
+
+    .proyecto-item .proyecto-icono {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      color: var(--blanco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      box-shadow:
+        0 4px 8px rgba(26, 29, 33, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    }
+
+    .proyecto-item .proyecto-info { flex: 1; min-width: 0; }
+
+    .proyecto-item .proyecto-nombre {
+      font-weight: 800;
+      font-size: clamp(0.9rem, 1.9vw, 1rem);
+      color: var(--texto);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .proyecto-item .proyecto-meta {
+      font-size: clamp(0.68rem, 1.5vw, 0.78rem);
+      font-weight: 600;
+      color: var(--texto-suave);
+    }
+
+    .proyecto-item .proyecto-acciones { display: flex; gap: 4px; flex-shrink: 0; }
+
+    .proyecto-item .btn-icono {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--texto-suave);
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      line-height: 1;
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    .proyecto-item .btn-icono:hover {
+      background: rgba(26, 29, 33, 0.06);
+      color: var(--texto);
+    }
+
+    .proyecto-item .btn-icono.eliminar:hover {
+      background: rgba(197, 48, 48, 0.12);
+      color: var(--rojo-apagado);
+    }
+
+    .empty-proyectos {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--texto-suave);
+      font-weight: 600;
+      font-size: clamp(0.8rem, 1.7vw, 0.9rem);
+      line-height: 1.6;
+    }
+
+    .empty-proyectos .emoji {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* ===== VISTA DETALLE ===== */
+    .container {
+      background: var(--blanco);
+      border-radius: 26px;
+      width: 100%;
+      box-shadow:
+        0 20px 40px rgba(26, 29, 33, 0.15),
+        0 6px 12px rgba(26, 29, 33, 0.08),
+        inset 0 2px 4px rgba(255, 255, 255, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .header {
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      padding: clamp(14px, 2.5vw, 20px) clamp(16px, 3vw, 22px);
+      color: var(--blanco);
+      position: relative;
+      box-shadow:
+        inset 0 4px 8px rgba(255, 255, 255, 0.08),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      border-radius: 2px;
+    }
+
+    .header-text { min-width: 0; flex: 1 1 200px; }
+
+    .header-text h2 {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 900;
+      letter-spacing: -0.3px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .header-text h2:hover { opacity: 0.85; }
+
+    .header-text p {
+      font-size: clamp(0.65rem, 1.5vw, 0.72rem);
+      font-weight: 600;
+      opacity: 0.6;
+    }
+
+    .body-content {
+      padding: clamp(14px, 3vw, 20px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 2vw, 16px);
+    }
+
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="password"] {
+      flex: 1 1 130px;
+      padding: 13px 16px;
+      border: none;
+      border-radius: 14px;
+      background: var(--fondo-2);
+      color: var(--texto);
+      font-size: 16px; /* evita zoom en iOS */
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      box-shadow:
+        inset 0 3px 6px rgba(26, 29, 33, 0.1),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.8);
+      transition: all 0.25s ease;
+      outline: none;
+      min-height: 48px;
+    }
+
+    input::placeholder { color: var(--texto-suave); font-weight: 600; opacity: 0.8; }
+
+    input:focus {
+      background: var(--blanco);
+      box-shadow:
+        inset 0 3px 6px rgba(26, 29, 33, 0.08),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.9),
+        0 0 0 3px rgba(74, 85, 104, 0.2);
+    }
+
+    button.primary {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      color: var(--blanco);
+      flex-shrink: 0;
+      box-shadow:
+        0 6px 12px rgba(26, 29, 33, 0.3),
+        0 3px 6px rgba(26, 29, 33, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      position: relative;
+      overflow: hidden;
+      min-height: 48px;
+    }
+
+    button.primary::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 15%;
+      right: 15%;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+      border-radius: 14px 14px 50% 50%;
+      pointer-events: none;
+    }
+
+    button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 9px 16px rgba(26, 29, 33, 0.35),
+        0 5px 8px rgba(26, 29, 33, 0.25),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    button.primary:active {
+      transform: translateY(2px) scale(0.98);
+      box-shadow:
+        0 2px 6px rgba(26, 29, 33, 0.3),
+        inset 0 3px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-title {
+      font-size: clamp(0.68rem, 1.6vw, 0.78rem);
+      font-weight: 800;
+      color: var(--texto-suave);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: -4px;
+    }
+
+    .lista-wrapper {
+      max-height: min(420px, 50vh);
+      overflow-y: auto;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .persona-card {
+      background: var(--blanco);
+      border-radius: 16px;
+      padding: clamp(11px, 2vw, 14px);
+      box-shadow:
+        0 5px 10px rgba(26, 29, 33, 0.08),
+        0 2px 4px rgba(26, 29, 33, 0.05),
+        inset 0 1px 2px rgba(255, 255, 255, 1);
+      border: 1px solid rgba(26, 29, 33, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      transition: all 0.2s ease;
+      animation: popIn 0.3s ease-out;
+    }
+
+    .persona-card:hover {
+      box-shadow:
+        0 7px 14px rgba(26, 29, 33, 0.12),
+        0 2px 4px rgba(26, 29, 33, 0.08);
+    }
+
+    .persona-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .persona-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 140px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: var(--blanco);
+      flex-shrink: 0;
+      box-shadow:
+        0 4px 8px rgba(26, 29, 33, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15);
+    }
+
+    .avatar.c0 { background: linear-gradient(145deg, var(--gris-oscuro), var(--negro)); }
+    .avatar.c1 { background: linear-gradient(145deg, var(--azul-acero-claro), var(--azul-acero)); }
+    .avatar.c2 { background: linear-gradient(145deg, var(--gris-medio), var(--gris-oscuro)); }
+    .avatar.c3 { background: linear-gradient(145deg, #48bb78, var(--verde-apagado)); }
+    .avatar.c4 { background: linear-gradient(145deg, #718096, #4a5568); }
+
+    .persona-nombre {
+      font-weight: 800;
+      color: var(--texto);
+      font-size: clamp(0.85rem, 1.9vw, 0.95rem);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .persona-subtotal {
+      font-weight: 900;
+      color: var(--negro);
+      font-size: clamp(0.82rem, 1.8vw, 0.92rem);
+      font-variant-numeric: tabular-nums;
+      background: var(--fondo-2);
+      padding: 4px 10px;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 4px rgba(26, 29, 33, 0.08);
+      white-space: nowrap;
+    }
+
+    .btn-eliminar {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--texto-suave);
+      padding: 6px 8px;
+      border-radius: 7px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      line-height: 1;
+      min-width: 32px;
+      min-height: 32px;
+    }
+
+    .btn-eliminar:hover {
+      background: rgba(197, 48, 48, 0.1);
+      color: var(--rojo-apagado);
+    }
+
+    .conceptos-lista { display: flex; flex-direction: column; gap: 5px; }
+
+    .concepto-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: var(--fondo-2);
+      border-radius: 9px;
+      font-size: clamp(0.72rem, 1.6vw, 0.8rem);
+      font-weight: 700;
+      box-shadow: inset 0 2px 4px rgba(26, 29, 33, 0.06);
+      gap: 6px;
+    }
+
+    .concepto-item .concepto-nombre {
+      color: var(--texto);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .concepto-item .concepto-nombre::before {
+      content: '•';
+      color: var(--gris-medio);
+      font-weight: 900;
+    }
+
+    .concepto-item .concepto-monto {
+      color: var(--rojo-apagado);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .concepto-item .btn-quitar-concepto {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--texto-suave);
+      font-size: 0.8rem;
+      padding: 3px 6px;
+      border-radius: 5px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      margin-left: 3px;
+      min-width: 28px;
+      min-height: 28px;
+    }
+
+    .concepto-item .btn-quitar-concepto:hover {
+      background: rgba(197, 48, 48, 0.15);
+      color: var(--rojo-apagado);
+    }
+
+    .concepto-empty {
+      font-size: clamp(0.68rem, 1.5vw, 0.75rem);
+      font-weight: 600;
+      color: var(--texto-suave);
+      font-style: italic;
+      padding: 3px 0;
+      opacity: 0.7;
+    }
+
+    .concepto-input-row {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .concepto-input-row input {
+      flex: 1 1 90px;
+      padding: 9px 11px;
+      font-size: 16px;
+      border-radius: 9px;
+      min-height: 42px;
+    }
+
+    .concepto-input-row input.concepto-monto-input { flex: 0 1 90px; }
+
+    .btn-add-concepto {
+      padding: 9px 13px;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: clamp(0.72rem, 1.6vw, 0.8rem);
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(145deg, var(--azul-acero-claro), var(--azul-acero));
+      color: var(--blanco);
+      flex-shrink: 0;
+      box-shadow:
+        0 3px 6px rgba(74, 85, 104, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      min-height: 42px;
+    }
+
+    .btn-add-concepto:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 5px 10px rgba(74, 85, 104, 0.35),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-add-concepto:active { transform: translateY(1px) scale(0.98); }
+
+    .resultado {
+      background: var(--fondo-2);
+      padding: clamp(13px, 2.5vw, 18px);
+      border-radius: 14px;
+      line-height: 1.6;
+      font-size: clamp(0.78rem, 1.7vw, 0.85rem);
+      font-weight: 600;
+      color: var(--texto);
+      box-shadow:
+        inset 0 4px 10px rgba(26, 29, 33, 0.08),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.8);
+      min-height: 55px;
+      word-break: break-word;
+      animation: popIn 0.3s ease-out;
+    }
+
+    .resultado b { color: var(--negro); font-weight: 900; }
+
+    .resultado:empty::before {
+      content: 'Los resultados aparecerán aquí...';
+      color: var(--texto-suave);
+      font-style: italic;
+      font-weight: 600;
+      opacity: 0.7;
+    }
+
+    .resultado .pago-item {
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(26, 29, 33, 0.1);
+    }
+
+    .resultado .pago-item:last-child { border-bottom: none; }
+
+    .acciones-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .btn-accion {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: clamp(0.78rem, 1.8vw, 0.86rem);
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      min-height: 48px;
+    }
+
+    .btn-accion.calcular {
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      color: var(--blanco);
+      box-shadow:
+        0 6px 12px rgba(26, 29, 33, 0.3),
+        0 3px 6px rgba(26, 29, 33, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-accion.calcular::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 15%;
+      right: 15%;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+      border-radius: 14px 14px 50% 50%;
+      pointer-events: none;
+    }
+
+    .btn-accion.calcular:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 9px 16px rgba(26, 29, 33, 0.35),
+        0 5px 8px rgba(26, 29, 33, 0.25),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-accion.calcular:active {
+      transform: translateY(2px) scale(0.98);
+      box-shadow:
+        0 2px 6px rgba(26, 29, 33, 0.3),
+        inset 0 3px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-accion.resetear {
+      background: linear-gradient(145deg, #e53e3e, var(--rojo-apagado));
+      color: var(--blanco);
+      box-shadow:
+        0 6px 12px rgba(197, 48, 48, 0.35),
+        0 3px 6px rgba(197, 48, 48, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -3px 6px rgba(155, 44, 44, 0.4);
+    }
+
+    .btn-accion.resetear::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 15%;
+      right: 15%;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+      border-radius: 14px 14px 50% 50%;
+      pointer-events: none;
+    }
+
+    .btn-accion.resetear:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 9px 16px rgba(197, 48, 48, 0.45),
+        0 5px 8px rgba(197, 48, 48, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -3px 6px rgba(155, 44, 44, 0.4);
+    }
+
+    .btn-accion.resetear:active {
+      transform: translateY(2px) scale(0.98);
+      box-shadow:
+        0 2px 6px rgba(197, 48, 48, 0.3),
+        inset 0 3px 8px rgba(155, 44, 44, 0.4);
+    }
+
+    .btn-accion.whatsapp {
+      background: linear-gradient(145deg, #48bb78, var(--verde-apagado));
+      color: var(--blanco);
+      box-shadow:
+        0 6px 12px rgba(56, 161, 105, 0.3),
+        0 3px 6px rgba(56, 161, 105, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -3px 6px rgba(47, 133, 90, 0.4);
+    }
+
+    .btn-accion.whatsapp::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 15%;
+      right: 15%;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+      border-radius: 14px 14px 50% 50%;
+      pointer-events: none;
+    }
+
+    .btn-accion.whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 9px 16px rgba(56, 161, 105, 0.35),
+        0 5px 8px rgba(56, 161, 105, 0.25),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -3px 6px rgba(47, 133, 90, 0.4);
+    }
+
+    .btn-accion.whatsapp:active {
+      transform: translateY(2px) scale(0.98);
+      box-shadow:
+        0 2px 6px rgba(56, 161, 105, 0.3),
+        inset 0 3px 8px rgba(47, 133, 90, 0.4);
+    }
+
+    .lista-wrapper::-webkit-scrollbar { width: 7px; }
+    .lista-wrapper::-webkit-scrollbar-track { background: transparent; }
+    .lista-wrapper::-webkit-scrollbar-thumb {
+      background: var(--gris-claro);
+      border-radius: 10px;
+    }
+    .lista-wrapper::-webkit-scrollbar-thumb:hover { background: var(--gris-medio); }
+
+    .footer {
+      text-align: center;
+      font-size: clamp(0.68rem, 1.5vw, 0.75rem);
+      color: var(--texto-suave);
+      margin-top: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-eliminar-proyecto {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 11px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: clamp(0.68rem, 1.6vw, 0.76rem);
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(145deg, #e53e3e, var(--rojo-apagado));
+      color: var(--blanco);
+      box-shadow:
+        0 3px 6px rgba(197, 48, 48, 0.35),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(155, 44, 44, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      min-height: 36px;
+    }
+
+    .btn-eliminar-proyecto:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 5px 10px rgba(197, 48, 48, 0.45),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(155, 44, 44, 0.4);
+    }
+
+    .btn-eliminar-proyecto:active { transform: translateY(1px) scale(0.98); }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 29, 33, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.activo { display: flex; }
+
+    .modal {
+      background: var(--blanco);
+      border-radius: 26px;
+      padding: clamp(20px, 4vw, 28px) clamp(18px, 3.5vw, 26px) clamp(18px, 3vw, 24px);
+      width: 100%;
+      max-width: 420px;
+      box-shadow:
+        0 24px 48px rgba(26, 29, 33, 0.35),
+        0 8px 16px rgba(26, 29, 33, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 1);
+      animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      margin: auto;
+    }
+
+    .modal-icon-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .modal-icon {
+      width: clamp(56px, 12vw, 64px);
+      height: clamp(56px, 12vw, 64px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.5rem, 4vw, 1.8rem);
+      box-shadow:
+        0 8px 16px rgba(26, 29, 33, 0.15),
+        inset 0 3px 6px rgba(255, 255, 255, 0.3),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+      animation: iconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+    }
+
+    .modal-icon.info { background: linear-gradient(145deg, var(--azul-acero-claro), var(--azul-acero)); color: var(--blanco); }
+    .modal-icon.success { background: linear-gradient(145deg, #48bb78, var(--verde-apagado)); color: var(--blanco); }
+    .modal-icon.danger { background: linear-gradient(145deg, #e53e3e, var(--rojo-apagado)); color: var(--blanco); }
+    .modal-icon.warning { background: linear-gradient(145deg, #ecc94b, var(--amarillo)); color: var(--negro); }
+
+    .modal h3 {
+      font-size: clamp(1rem, 2.6vw, 1.15rem);
+      font-weight: 900;
+      color: var(--texto);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .modal p {
+      font-size: clamp(0.8rem, 1.9vw, 0.88rem);
+      font-weight: 600;
+      color: var(--texto-suave);
+      margin-bottom: 16px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .modal input[type="text"],
+    .modal input[type="password"],
+    .modal input[type="number"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 14px;
+      background: var(--fondo-2);
+      color: var(--texto);
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      box-shadow:
+        inset 0 3px 6px rgba(26, 29, 33, 0.1),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.8);
+      transition: all 0.25s ease;
+      outline: none;
+      margin-bottom: 12px;
+      flex: none;
+      min-height: 48px;
+    }
+
+    .modal input:focus {
+      background: var(--blanco);
+      box-shadow:
+        inset 0 3px 6px rgba(26, 29, 33, 0.08),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.9),
+        0 0 0 3px rgba(74, 85, 104, 0.2);
+    }
+
+    .modal-botones {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .modal-botones button {
+      flex: 1 1 120px;
+      padding: 13px 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: clamp(0.8rem, 1.9vw, 0.88rem);
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow:
+        0 4px 8px rgba(26, 29, 33, 0.12),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+      min-height: 46px;
+    }
+
+    .modal-botones button:hover { transform: translateY(-2px); }
+    .modal-botones button:active { transform: translateY(1px) scale(0.98); }
+
+    .btn-cancelar {
+      background: var(--fondo-2);
+      color: var(--texto-suave);
+    }
+
+    .btn-cancelar:hover { color: var(--texto); }
+
+    .btn-confirmar {
+      background: linear-gradient(145deg, var(--gris-oscuro), var(--negro));
+      color: var(--blanco);
+    }
+
+    .btn-confirmar.peligro {
+      background: linear-gradient(145deg, #e53e3e, var(--rojo-apagado));
+    }
+
+    .btn-confirmar.exito {
+      background: linear-gradient(145deg, #48bb78, var(--verde-apagado));
+    }
+
+    .modal-error {
+      color: var(--rojo-apagado);
+      font-size: clamp(0.72rem, 1.7vw, 0.8rem);
+      font-weight: 700;
+      margin-top: -6px;
+      margin-bottom: 10px;
+      min-height: 16px;
+      display: none;
+      text-align: center;
+      animation: shake 0.4s ease;
+    }
+
+    .modal-error.visible { display: block; }
+
+    /* ===== ANIMACIONES ===== */
+    .anim-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2000;
+      overflow: hidden;
+    }
+
+    .anim-particle {
+      position: absolute;
+      font-size: 1.8rem;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    @keyframes fallDown {
+      0% { opacity: 0; transform: translateY(-60px) rotate(0deg) scale(0.6); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(110vh) rotate(360deg) scale(1); }
+    }
+
+    @keyframes riseUp {
+      0% { opacity: 0; transform: translateY(40px) scale(0.5); }
+      25% { opacity: 1; transform: translateY(0) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-110vh) scale(0.8); }
+    }
+
+    @keyframes explodeOut {
+      0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+      30% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.5); }
+    }
+
+    @keyframes flyAway {
+      0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.5); }
+      20% { opacity: 1; transform: translate(0, -20px) rotate(-10deg) scale(1); }
+      100% { opacity: 0; transform: translate(60vw, -100vh) rotate(25deg) scale(0.6); }
+    }
+
+    @keyframes burstCenter {
+      0% { opacity: 0; transform: scale(0.3); }
+      40% { opacity: 1; transform: scale(1.4); }
+      100% { opacity: 0; transform: scale(2.2); }
+    }
+
+    @keyframes spinAround {
+      0% { opacity: 0; transform: rotate(0deg) scale(0.5); }
+      30% { opacity: 1; transform: rotate(180deg) scale(1.1); }
+      100% { opacity: 0; transform: rotate(720deg) scale(0.8); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    @keyframes modalIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes iconPop {
+      0% { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+      60% { transform: scale(1.15) rotate(5deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    .hidden { display: none !important; }
+
+    /* ===== RESPONSIVE ===== */
+
+    /* Tablet */
+    @media (max-width: 900px) {
+      .app-wrapper { max-width: 100%; }
+      .lista-wrapper { max-height: min(380px, 45vh); }
+    }
+
+    /* Móvil */
+    @media (max-width: 600px) {
+      body { padding: 14px 10px; }
+      .container, .proyectos-home { border-radius: 22px; }
+      .body-content { padding: 14px 14px 12px; }
+      .home-body { padding: 16px; }
+      .input-row { flex-direction: column; }
+      input[type="text"], input[type="number"] { flex: 1 1 auto; width: 100%; }
+      button.primary { width: 100%; }
+      .acciones-row { flex-direction: column; }
+      .concepto-input-row { flex-wrap: wrap; }
+      .concepto-input-row input { flex: 1 1 100%; }
+      .concepto-input-row input.concepto-monto-input { flex: 1 1 100%; }
+      .btn-add-concepto { width: 100%; }
+      .persona-header { flex-wrap: wrap; }
+      .tab, .tab.activo { font-size: 0.75rem; padding: 7px 12px; min-height: 34px; }
+      .tab-rename-input { width: 120px; }
+      .lista-wrapper { max-height: min(340px, 42vh); }
+      .header { flex-direction: row; }
+      .header-text h2 { font-size: 1rem; }
+    }
+
+    /* Móvil pequeño */
+    @media (max-width: 380px) {
+      body { padding: 10px 8px; }
+      .brand-name { font-size: 1.2rem; }
+      .brand-logo { width: 34px; height: 34px; font-size: 1rem; }
+      .tab { font-size: 0.7rem; padding: 6px 10px; }
+      .tab-rename-input { width: 100px; }
+      .modal { padding: 18px 16px 16px; }
+      .modal-botones button { flex: 1 1 100%; }
+    }
+
+    /* Pantallas grandes (PC) */
+    @media (min-width: 1200px) {
+      .app-wrapper { max-width: 900px; }
+      .lista-wrapper { max-height: 480px; }
+    }
+
+    /* Reducción de movimiento */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.94); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div class="brand">
+      <div class="brand-logo">P</div>
+      <div class="brand-name">Pag<span>App</span></div>
+    </div>
+
+    <div class="tabs-bar" id="tabsBar"></div>
+
+    <!-- VISTA HOME -->
+    <div class="proyectos-home" id="vistaHome">
+      <div class="home-header">
+        <h2>📁 Proyectos</h2>
+        <p>Selecciona un proyecto o crea uno nuevo</p>
+      </div>
+      <div class="home-body">
+        <button class="btn-crear-proyecto" onclick="abrirModalNuevoProyecto()">＋ Crear nuevo proyecto</button>
+        <div class="proyectos-lista" id="proyectosLista"></div>
+      </div>
+    </div>
+
+    <!-- VISTA DETALLE -->
+    <div class="container hidden" id="vistaDetalle">
+      <div class="header">
+        <div class="header-text">
+          <h2 id="proyectoTitulo" title="Doble clic para renombrar">PagApp</h2>
+          <p id="proyectoSubtitulo">Divide y ajusta cuentas fácilmente</p>
+        </div>
+        <button class="btn-eliminar-proyecto" onclick="solicitarEliminarProyecto()">🗑️ Eliminar</button>
+      </div>
+
+      <div class="body-content">
+        <div class="input-row">
+          <input type="text" id="nombre" placeholder="Nombre de la persona" autocomplete="off">
+          <button class="primary" onclick="intentarAgregarPersona()">+ Nueva persona</button>
+        </div>
+
+        <div class="section-title">Personas y conceptos</div>
+        <div class="lista-wrapper" id="listaWrapper"></div>
+
+        <div class="acciones-row">
+          <button class="btn-accion calcular" id="btnAccion" onclick="accionPrincipal()">Calcular ajustes</button>
+          <button class="btn-accion whatsapp" onclick="intentarEnviarWhatsApp()">📲 Enviar</button>
+        </div>
+
+        <div class="resultado" id="resultado"></div>
+      </div>
+    </div>
+
+    <div class="footer">By Pablo Ojeda</div>
+  </div>
+
+  <!-- MODAL GENÉRICO -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-icon-wrap">
+        <div class="modal-icon info" id="modalIcon">ℹ️</div>
+      </div>
+      <h3 id="modalTitulo">Título</h3>
+      <p id="modalMensaje">Mensaje</p>
+      <input type="text" id="modalInput" class="hidden" placeholder="">
+      <div class="modal-error" id="modalError">Error</div>
+      <div class="modal-botones" id="modalBotones"></div>
+    </div>
+  </div>
+
+  <div class="anim-layer" id="animLayer"></div>
+
+  <script>
+    const PASSWORD = 'ControlInterno2026';
+    const STORAGE_KEY = 'pagapp_proyectos_v6';
+
+    let proyectos = [];
+    let proyectoActivoId = null;
+    let proyectoAEliminar = null;
+    let hayResultado = false;
+
+    function guardar() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ proyectos })); }
+      catch (e) { console.warn('No se pudo guardar', e); }
+    }
+
+    function cargar() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          proyectos = data.proyectos || [];
+        }
+      } catch (e) { proyectos = []; }
+      proyectoActivoId = null;
+    }
+
+    function getProyectoActivo() { return proyectos.find(p => p.id === proyectoActivoId); }
+    function generarId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
+
+    // ===== ANIMACIONES =====
+    const animLayer = document.getElementById('animLayer');
+
+    function lanzarAnimacion(tipo) {
+      const config = {
+        persona:   { emojis: ['👤', '👥', '🧑', '👨', '👩'], count: 14, anim: 'fallDown',  duration: 1600 },
+        concepto:  { emojis: ['💰', '💵', '🪙', '💸'],        count: 12, anim: 'riseUp',    duration: 1500 },
+        proyecto:  { emojis: ['📁', '✨', '📂'],              count: 10, anim: 'riseUp',    duration: 1500 },
+        eliminar:  { emojis: ['🗑️', '❌', '💥'],              count: 12, anim: 'explodeOut', duration: 1100 },
+        exito:     { emojis: ['✅', '🎉', '✨'],              count: 14, anim: 'burstCenter', duration: 1200 },
+        error:     { emojis: ['⚠️', '❌', '🚫'],              count: 10, anim: 'explodeOut', duration: 1000 },
+        candado:   { emojis: ['🔓', '🔑', '✨'],              count: 10, anim: 'burstCenter', duration: 1200 },
+        candadoErr:{ emojis: ['🔒', '⛔', '❌'],              count: 10, anim: 'explodeOut', duration: 1000 },
+        calcular:  { emojis: ['🧮', '📊', '💡', '✨'],        count: 12, anim: 'burstCenter', duration: 1300 },
+        resetear:  { emojis: ['↺', '🔄', '✨'],              count: 10, anim: 'spinAround', duration: 1200 },
+        whatsapp:  { emojis: ['✈️', '📤', '📨'],              count: 10, anim: 'flyAway',   duration: 1600 },
+      };
+
+      const c = config[tipo] || config.exito;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+
+      for (let i = 0; i < c.count; i++) {
+        const el = document.createElement('div');
+        el.className = 'anim-particle';
+        el.textContent = c.emojis[Math.floor(Math.random() * c.emojis.length)];
+        el.style.fontSize = (1.4 + Math.random() * 1.4) + 'rem';
+        el.style.left = cx + 'px';
+        el.style.top = cy + 'px';
+        el.style.animation = `${c.anim} ${c.duration}ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+        el.style.animationDelay = (i * 40) + 'ms';
+
+        const angle = (Math.PI * 2 * i) / c.count + Math.random() * 0.5;
+        const dist = 120 + Math.random() * 220;
+        el.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        el.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+
+        if (c.anim === 'fallDown') {
+          el.style.left = (Math.random() * window.innerWidth) + 'px';
+          el.style.top = '-60px';
+        }
+        if (c.anim === 'riseUp') {
+          el.style.left = (Math.random() * window.innerWidth) + 'px';
+          el.style.top = (window.innerHeight - 60) + 'px';
+        }
+        if (c.anim === 'flyAway') {
+          el.style.left = (cx - 40 + Math.random() * 80) + 'px';
+          el.style.top = (cy - 40 + Math.random() * 80) + 'px';
+        }
+
+        animLayer.appendChild(el);
+        setTimeout(() => el.remove(), c.duration + 400 + i * 40);
+      }
+    }
+
+    // ===== MODALES =====
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitulo = document.getElementById('modalTitulo');
+    const modalMensaje = document.getElementById('modalMensaje');
+    const modalInput = document.getElementById('modalInput');
+    const modalError = document.getElementById('modalError');
+    const modalBotones = document.getElementById('modalBotones');
+
+    let modalResolve = null;
+
+    function mostrarModal(opts) {
+      return new Promise((resolve) => {
+        modalResolve = resolve;
+
+        const iconMap = { info: 'ℹ️', success: '✅', danger: '🗑️', warning: '⚠️' };
+        modalIcon.className = 'modal-icon ' + (opts.iconoTipo || 'info');
+        modalIcon.textContent = opts.icono || iconMap[opts.iconoTipo] || 'ℹ️';
+
+        modalTitulo.textContent = opts.titulo || '';
+        modalMensaje.innerHTML = opts.mensaje || '';
+        modalMensaje.style.display = opts.mensaje ? 'block' : 'none';
+
+        if (opts.input) {
+          modalInput.classList.remove('hidden');
+          modalInput.type = opts.inputType || 'text';
+          modalInput.placeholder = opts.placeholder || '';
+          modalInput.value = opts.valorInput || '';
+        } else {
+          modalInput.classList.add('hidden');
+        }
+
+        modalError.classList.remove('visible');
+        modalError.textContent = '';
+
+        modalBotones.innerHTML = '';
+        const botones = opts.botones || [{ texto: 'OK', tipo: 'confirmar', valor: true }];
+        botones.forEach(b => {
+          const btn = document.createElement('button');
+          btn.className = b.tipo === 'cancelar' ? 'btn-cancelar' : 'btn-confirmar ' + (b.estilo || '');
+          btn.textContent = b.texto;
+          btn.addEventListener('click', () => {
+            const valor = b.valor;
+            const inputVal = opts.input ? modalInput.value : null;
+            cerrarModalInterno();
+            if (modalResolve) {
+              modalResolve({ confirmado: valor, input: inputVal });
+              modalResolve = null;
+            }
+          });
+          modalBotones.appendChild(btn);
+        });
+
+        modalOverlay.classList.add('activo');
+
+        if (opts.input) {
+          setTimeout(() => { modalInput.focus(); modalInput.select(); }, 150);
+        }
+      });
+    }
+
+    function cerrarModalInterno() {
+      modalOverlay.classList.remove('activo');
+      modalInput.value = '';
+      modalError.classList.remove('visible');
+    }
+
+    function cerrarModalConCancelar() {
+      if (modalResolve) {
+        modalResolve({ confirmado: false, input: null });
+        modalResolve = null;
+      }
+      cerrarModalInterno();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalOverlay.classList.contains('activo')) {
+        cerrarModalConCancelar();
+      }
+    });
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target.id === 'modalOverlay') cerrarModalConCancelar();
+    });
+
+    function modalAlerta(titulo, mensaje, tipo) {
+      return mostrarModal({
+        iconoTipo: tipo || 'info',
+        titulo,
+        mensaje,
+        botones: [{ texto: 'Entendido', tipo: 'confirmar', valor: true }]
+      });
+    }
+
+    function modalConfirmar(titulo, mensaje, textoConfirmar, estilo) {
+      return mostrarModal({
+        iconoTipo: 'danger',
+        icono: '⚠️',
+        titulo,
+        mensaje,
+        botones: [
+          { texto: 'Cancelar', tipo: 'cancelar', valor: false },
+          { texto: textoConfirmar || 'Confirmar', tipo: 'confirmar', valor: true, estilo: estilo || 'peligro' }
+        ]
+      });
+    }
+
+    function modalPrompt(titulo, mensaje, valorInicial, placeholder) {
+      return mostrarModal({
+        iconoTipo: 'info',
+        icono: '✏️',
+        titulo,
+        mensaje,
+        input: true,
+        valorInput: valorInicial || '',
+        placeholder: placeholder || '',
+        botones: [
+          { texto: 'Cancelar', tipo: 'cancelar', valor: false },
+          { texto: 'Aceptar', tipo: 'confirmar', valor: true }
+        ]
+      });
+    }
+
+    // ===== LÓGICA =====
+    function actualizarBotonAccion() {
+      const btn = document.getElementById('btnAccion');
+      if (!btn) return;
+      if (hayResultado) {
+        btn.classList.remove('calcular');
+        btn.classList.add('resetear');
+        btn.textContent = '↺ Resetear';
+      } else {
+        btn.classList.remove('resetear');
+        btn.classList.add('calcular');
+        btn.textContent = 'Calcular ajustes';
+      }
+    }
+
+    function accionPrincipal() {
+      if (hayResultado) {
+        resetearResultado();
+        lanzarAnimacion('resetear');
+      } else {
+        calcular();
+      }
+    }
+
+    function resetearResultado() {
+      document.getElementById('resultado').innerHTML = '';
+      hayResultado = false;
+      actualizarBotonAccion();
+    }
+
+    function invalidarResultado() {
+      if (hayResultado) {
+        document.getElementById('resultado').innerHTML = '';
+        hayResultado = false;
+        actualizarBotonAccion();
+      }
+    }
+
+    function irAHome() {
+      proyectoActivoId = null;
+      hayResultado = false;
+      renderizarTabs();
+      renderizarVista();
+    }
+
+    function abrirProyecto(id) {
+      proyectoActivoId = id;
+      hayResultado = false;
+      renderizarTabs();
+      renderizarVista();
+      document.getElementById('resultado').innerHTML = '';
+      actualizarBotonAccion();
+    }
+
+    function renderizarTabs() {
+      const bar = document.getElementById('tabsBar');
+      bar.innerHTML = '';
+
+      const tabHome = document.createElement('button');
+      tabHome.className = 'tab' + (proyectoActivoId === null ? ' activo' : '');
+      tabHome.innerHTML = '🏠 Proyectos';
+      tabHome.addEventListener('click', irAHome);
+      bar.appendChild(tabHome);
+
+      if (proyectoActivoId !== null) {
+        const p = getProyectoActivo();
+        if (p) {
+          const tab = document.createElement('button');
+          tab.className = 'tab activo';
+          tab.innerHTML = `<span class="tab-nombre">📁 ${p.nombre}</span><span class="tab-close" title="Eliminar proyecto">✕</span>`;
+
+          const nombreSpan = tab.querySelector('.tab-nombre');
+          nombreSpan.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            editarNombreProyecto(p.id, nombreSpan);
+          });
+          let lastTap = 0;
+          nombreSpan.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTap < 300) {
+              e.preventDefault();
+              editarNombreProyecto(p.id, nombreSpan);
+            }
+            lastTap = now;
+          });
+
+          tab.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-close')) {
+              e.stopPropagation();
+              abrirModalEliminar(p.id);
+            }
+          });
+
+          bar.appendChild(tab);
+        }
+      }
+    }
+
+    function editarNombreProyecto(id, spanElement) {
+      const p = proyectos.find(x => x.id === id);
+      if (!p) return;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'tab-rename-input';
+      input.value = p.nombre;
+
+      const terminar = (guardarCambio) => {
+        if (guardarCambio) {
+          const nuevoNombre = input.value.trim();
+          if (nuevoNombre && nuevoNombre !== p.nombre) {
+            p.nombre = nuevoNombre;
+            guardar();
+            renderizarTabs();
+            if (proyectoActivoId === id) renderizarHeader();
+          } else {
+            renderizarTabs();
+          }
+        } else {
+          renderizarTabs();
+        }
+      };
+
+      input.addEventListener('blur', () => terminar(true));
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); terminar(true); }
+        if (e.key === 'Escape') { e.preventDefault(); terminar(false); }
+      });
+
+      spanElement.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
+    function renderizarVista() {
+      const home = document.getElementById('vistaHome');
+      const detalle = document.getElementById('vistaDetalle');
+
+      if (proyectoActivoId === null) {
+        home.classList.remove('hidden');
+        detalle.classList.add('hidden');
+        renderizarHome();
+      } else {
+        home.classList.add('hidden');
+        detalle.classList.remove('hidden');
+        renderizarHeader();
+        renderizar();
+      }
+    }
+
+    function renderizarHome() {
+      const lista = document.getElementById('proyectosLista');
+      lista.innerHTML = '';
+
+      if (proyectos.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-proyectos">
+            <span class="emoji">📂</span>
+            No hay proyectos todavía.<br>
+            Crea uno para comenzar.
+          </div>
+        `;
+        return;
+      }
+
+      proyectos.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'proyecto-item';
+
+        const totalPersonas = p.personas.length;
+        const totalConceptos = p.personas.reduce((acc, x) => acc + x.conceptos.length, 0);
+        const totalMonto = p.personas.reduce((acc, x) =>
+          acc + x.conceptos.reduce((s, c) => s + c.monto, 0), 0);
+
+        item.innerHTML = `
+          <div class="proyecto-icono">📁</div>
+          <div class="proyecto-info">
+            <div class="proyecto-nombre" title="Doble clic para renombrar">${p.nombre}</div>
+            <div class="proyecto-meta">${totalPersonas} persona${totalPersonas !== 1 ? 's' : ''} · ${totalConceptos} concepto${totalConceptos !== 1 ? 's' : ''} · $${totalMonto.toFixed(2)}</div>
+          </div>
+          <div class="proyecto-acciones">
+            <button class="btn-icono eliminar" title="Eliminar proyecto">🗑️</button>
+          </div>
+        `;
+
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.btn-icono')) return;
+          abrirProyecto(p.id);
+        });
+
+        const nombreDiv = item.querySelector('.proyecto-nombre');
+        nombreDiv.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          editarNombreEnLista(p.id, nombreDiv);
+        });
+
+        let lastTap = 0;
+        nombreDiv.addEventListener('touchend', (e) => {
+          const now = Date.now();
+          if (now - lastTap < 300) {
+            e.preventDefault();
+            e.stopPropagation();
+            editarNombreEnLista(p.id, nombreDiv);
+          }
+          lastTap = now;
+        });
+
+        item.querySelector('.btn-icono.eliminar').addEventListener('click', (e) => {
+          e.stopPropagation();
+          abrirModalEliminar(p.id);
+        });
+
+        lista.appendChild(item);
+      });
+    }
+
+    function editarNombreEnLista(id, nombreDiv) {
+      const p = proyectos.find(x => x.id === id);
+      if (!p) return;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'tab-rename-input';
+      input.style.width = '100%';
+      input.value = p.nombre;
+
+      const terminar = (guardarCambio) => {
+        if (guardarCambio) {
+          const nuevoNombre = input.value.trim();
+          if (nuevoNombre && nuevoNombre !== p.nombre) {
+            p.nombre = nuevoNombre;
+            guardar();
+            if (proyectoActivoId === id) renderizarHeader();
+          }
+        }
+        renderizarHome();
+      };
+
+      input.addEventListener('blur', () => terminar(true));
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); terminar(true); }
+        if (e.key === 'Escape') { e.preventDefault(); terminar(false); }
+      });
+
+      nombreDiv.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
+    function renderizarHeader() {
+      const p = getProyectoActivo();
+      document.getElementById('proyectoTitulo').textContent = p ? p.nombre : 'PagApp';
+    }
+
+    async function abrirModalNuevoProyecto() {
+      const res = await modalPrompt(
+        'Nuevo proyecto',
+        'Escribe un nombre para el proyecto:',
+        `Proyecto ${proyectos.length + 1}`,
+        'Nombre del proyecto'
+      );
+      if (!res.confirmado) return;
+      const nombreLimpio = (res.input || '').trim();
+      if (!nombreLimpio) {
+        await modalAlerta('Nombre vacío', 'El nombre no puede estar vacío.', 'warning');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      const nuevo = { id: generarId(), nombre: nombreLimpio, personas: [] };
+      proyectos.push(nuevo);
+      guardar();
+      abrirProyecto(nuevo.id);
+      lanzarAnimacion('proyecto');
+    }
+
+    function abrirModalEliminar(id) {
+      const p = proyectos.find(x => x.id === id);
+      if (!p) return;
+      proyectoAEliminar = id;
+
+      mostrarModal({
+        iconoTipo: 'danger',
+        icono: '🔒',
+        titulo: 'Confirmar eliminación',
+        mensaje: `Para eliminar el proyecto <b>${p.nombre}</b> y todos sus datos, ingresa la contraseña de administrador.`,
+        input: true,
+        inputType: 'password',
+        placeholder: 'Contraseña',
+        botones: [
+          { texto: 'Cancelar', tipo: 'cancelar', valor: false },
+          { texto: 'Eliminar', tipo: 'confirmar', valor: true, estilo: 'peligro' }
+        ]
+      }).then((res) => {
+        if (!res.confirmado) return;
+        if (res.input !== PASSWORD) {
+          lanzarAnimacion('candadoErr');
+          modalAlerta('Contraseña incorrecta', 'La contraseña ingresada no es válida. No se eliminó el proyecto.', 'danger');
+          return;
+        }
+        lanzarAnimacion('candado');
+        setTimeout(() => ejecutarEliminarProyecto(), 400);
+      });
+    }
+
+    function solicitarEliminarProyecto() {
+      if (!proyectoActivoId) return;
+      abrirModalEliminar(proyectoActivoId);
+    }
+
+    function ejecutarEliminarProyecto() {
+      const idx = proyectos.findIndex(p => p.id === proyectoAEliminar);
+      if (idx === -1) return;
+
+      proyectos.splice(idx, 1);
+      if (proyectoActivoId === proyectoAEliminar) proyectoActivoId = null;
+      proyectoAEliminar = null;
+      guardar();
+      hayResultado = false;
+      renderizarTabs();
+      renderizarVista();
+      lanzarAnimacion('eliminar');
+    }
+
+    async function intentarAgregarPersona() {
+      const p = getProyectoActivo();
+      if (!p) return;
+
+      const nombreInput = document.getElementById('nombre');
+      const nombre = nombreInput.value.trim();
+
+      if (!nombre) {
+        await modalAlerta('Campo vacío', 'Ingresa un nombre válido para la persona.', 'warning');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      p.personas.push({ nombre, conceptos: [] });
+      nombreInput.value = '';
+      nombreInput.focus();
+      guardar();
+      invalidarResultado();
+      renderizar();
+      lanzarAnimacion('persona');
+    }
+
+    async function eliminarPersona(index) {
+      const p = getProyectoActivo();
+      if (!p) return;
+
+      const res = await modalConfirmar(
+        'Eliminar persona',
+        `¿Eliminar a <b>${p.personas[index].nombre}</b> y todos sus conceptos?`,
+        'Eliminar',
+        'peligro'
+      );
+      if (!res.confirmado) return;
+
+      p.personas.splice(index, 1);
+      guardar();
+      invalidarResultado();
+      renderizar();
+      lanzarAnimacion('eliminar');
+    }
+
+    async function agregarConcepto(personaIndex, nombreConcepto, montoConcepto) {
+      const p = getProyectoActivo();
+      if (!p) return false;
+
+      const nombre = nombreConcepto.trim();
+      const monto = parseFloat(montoConcepto);
+
+      if (!nombre || isNaN(monto) || monto <= 0) {
+        await modalAlerta('Datos inválidos', 'Ingresa un concepto y un monto válido (mayor a 0).', 'warning');
+        lanzarAnimacion('error');
+        return false;
+      }
+
+      p.personas[personaIndex].conceptos.push({ nombre, monto });
+      guardar();
+      invalidarResultado();
+      renderizar();
+      lanzarAnimacion('concepto');
+      return true;
+    }
+
+    async function quitarConcepto(personaIndex, conceptoIndex) {
+      const p = getProyectoActivo();
+      if (!p) return;
+
+      const concepto = p.personas[personaIndex].conceptos[conceptoIndex];
+      const res = await modalConfirmar(
+        'Quitar concepto',
+        `¿Quitar <b>${concepto.nombre}</b> ($${concepto.monto.toFixed(2)})?`,
+        'Quitar',
+        'peligro'
+      );
+      if (!res.confirmado) return;
+
+      p.personas[personaIndex].conceptos.splice(conceptoIndex, 1);
+      guardar();
+      invalidarResultado();
+      renderizar();
+      lanzarAnimacion('eliminar');
+    }
+
+    function subtotalPersona(persona) {
+      return persona.conceptos.reduce((acc, c) => acc + c.monto, 0);
+    }
+
+    function renderizar() {
+      const wrapper = document.getElementById('listaWrapper');
+      const p = getProyectoActivo();
+      if (!p) return;
+
+      if (p.personas.length === 0) {
+        wrapper.innerHTML = '<div class="empty-proyectos" style="padding:24px 16px;"><span class="emoji">👥</span>Aún no hay personas en este proyecto.<br>Agrega una para comenzar.</div>';
+        return;
+      }
+
+      wrapper.innerHTML = '';
+      const colores = ['c0', 'c1', 'c2', 'c3', 'c4'];
+
+      p.personas.forEach((persona, i) => {
+        const colorClass = colores[i % colores.length];
+        const inicial = persona.nombre.charAt(0).toUpperCase();
+        const subtotal = subtotalPersona(persona);
+        const sinConceptos = persona.conceptos.length === 0;
+
+        const card = document.createElement('div');
+        card.className = 'persona-card';
+
+        const header = document.createElement('div');
+        header.className = 'persona-header';
+        header.innerHTML = `
+          <div class="persona-info">
+            <div class="avatar ${colorClass}">${inicial}</div>
+            <span class="persona-nombre">${persona.nombre}</span>
+          </div>
+          <span class="persona-subtotal">$${subtotal.toFixed(2)}</span>
+          <button class="btn-eliminar" title="Eliminar persona">✕</button>
+        `;
+        header.querySelector('.btn-eliminar').addEventListener('click', () => eliminarPersona(i));
+        card.appendChild(header);
+
+        const conceptosLista = document.createElement('div');
+        conceptosLista.className = 'conceptos-lista';
+
+        if (sinConceptos) {
+          conceptosLista.innerHTML = '<div class="concepto-empty">Sin conceptos · aportación $0.00</div>';
+        } else {
+          persona.conceptos.forEach((c, j) => {
+            const item = document.createElement('div');
+            item.className = 'concepto-item';
+            item.innerHTML = `
+              <span class="concepto-nombre">${c.nombre}</span>
+              <span>
+                <span class="concepto-monto">$${c.monto.toFixed(2)}</span>
+                <button class="btn-quitar-concepto" title="Quitar concepto">✕</button>
+              </span>
+            `;
+            item.querySelector('.btn-quitar-concepto').addEventListener('click', () => quitarConcepto(i, j));
+            conceptosLista.appendChild(item);
+          });
+        }
+        card.appendChild(conceptosLista);
+
+        const inputRow = document.createElement('div');
+        inputRow.className = 'concepto-input-row';
+        inputRow.innerHTML = `
+          <input type="text" class="concepto-nombre-input" placeholder="Concepto (ej: agua)">
+          <input type="number" class="concepto-monto-input" placeholder="Monto" step="0.01" inputmode="decimal">
+          <button class="btn-add-concepto">+ Añadir</button>
+        `;
+        card.appendChild(inputRow);
+
+        const btnAdd = inputRow.querySelector('.btn-add-concepto');
+        const nombreInp = inputRow.querySelector('.concepto-nombre-input');
+        const montoInp = inputRow.querySelector('.concepto-monto-input');
+
+        btnAdd.addEventListener('click', async () => {
+          const ok = await agregarConcepto(i, nombreInp.value, montoInp.value);
+          if (ok) {
+            const nuevaFila = document.querySelectorAll('.concepto-input-row')[i];
+            if (nuevaFila) nuevaFila.querySelector('.concepto-nombre-input').focus();
+          }
+        });
+
+        [nombreInp, montoInp].forEach(inp => {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnAdd.click();
+          });
+        });
+
+        wrapper.appendChild(card);
+      });
+    }
+
+    async function calcular() {
+      const p = getProyectoActivo();
+      if (!p) return;
+
+      if (p.personas.length < 2) {
+        await modalAlerta('Faltan personas', 'Agrega al menos dos personas para calcular.', 'warning');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      // ✅ Personas sin conceptos aportan $0 — NO se bloquea el cálculo
+      const total = p.personas.reduce((acc, x) => acc + subtotalPersona(x), 0);
+      const promedio = total / p.personas.length;
+      let deudores = [], acreedores = [];
+
+      p.personas.forEach(x => {
+        const subtotal = subtotalPersona(x);
+        const diff = +(subtotal - promedio).toFixed(2);
+        if (diff < 0) deudores.push({ nombre: x.nombre, deuda: -diff });
+        else if (diff > 0) acreedores.push({ nombre: x.nombre, deuda: diff });
+      });
+
+      let movimientos = [];
+      deudores.forEach(d => {
+        acreedores.forEach(a => {
+          if (d.deuda > 0 && a.deuda > 0) {
+            const pago = Math.min(d.deuda, a.deuda);
+            movimientos.push({ de: d.nombre, a: a.nombre, monto: pago });
+            d.deuda -= pago;
+            a.deuda -= pago;
+          }
+        });
+      });
+
+      let desgloseHTML = '<b>Desglose por persona:</b><br>';
+      p.personas.forEach(x => {
+        const subtotal = subtotalPersona(x);
+        const sinCon = x.conceptos.length === 0;
+        const conceptosStr = sinCon
+          ? '<i>sin conceptos</i>'
+          : x.conceptos.map(c => `${c.nombre} $${c.monto.toFixed(2)}`).join(', ');
+        desgloseHTML += `<div class="pago-item"><b>${x.nombre}:</b> $${subtotal.toFixed(2)} <span style="color:var(--texto-suave);font-weight:600;">(${conceptosStr})</span></div>`;
+      });
+
+      const resultadoDiv = document.getElementById('resultado');
+      resultadoDiv.innerHTML =
+        `<b>Proyecto:</b> ${p.nombre}<br>` +
+        `<b>Total general:</b> $${total.toFixed(2)}<br>` +
+        `<b>Promedio por persona:</b> $${promedio.toFixed(2)}<br><br>` +
+        desgloseHTML +
+        `<br><b>Ajustes:</b><br>` +
+        (movimientos.length
+          ? movimientos.map(m => `<div class="pago-item">${m.de} le paga $${m.monto.toFixed(2)} a ${m.a}</div>`).join('')
+          : 'Todos están parejos.');
+
+      hayResultado = true;
+      actualizarBotonAccion();
+      lanzarAnimacion('calcular');
+    }
+
+    async function intentarEnviarWhatsApp() {
+      const texto = document.getElementById('resultado').innerText.trim();
+      if (!texto) {
+        await modalAlerta('Sin resultados', 'Primero calcula los ajustes antes de enviar.', 'warning');
+        lanzarAnimacion('error');
+        return;
+      }
+      lanzarAnimacion('whatsapp');
+      setTimeout(() => {
+        const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        window.open(url, '_blank');
+      }, 500);
+    }
+
+    document.getElementById('nombre').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') intentarAgregarPersona();
+    });
+
+    document.getElementById('proyectoTitulo').addEventListener('dblclick', () => {
+      const p = getProyectoActivo();
+      if (!p) return;
+      const span = document.getElementById('proyectoTitulo');
+      editarNombreProyecto(p.id, span);
+    });
+
+    // ===== INIT =====
+    cargar();
+    renderizarTabs();
+    renderizarVista();
+  </script>
+</body>
+</html>
