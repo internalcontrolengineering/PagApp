@@ -31,9 +31,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      overflow-x: hidden;
-    }
+    html, body { overflow-x: hidden; }
 
     body {
       font-family: 'Nunito', system-ui, -apple-system, sans-serif;
@@ -452,7 +450,7 @@
       border-radius: 14px;
       background: var(--fondo-2);
       color: var(--texto);
-      font-size: 16px; /* evita zoom en iOS */
+      font-size: 16px;
       font-weight: 700;
       font-family: 'Nunito', sans-serif;
       box-shadow:
@@ -660,6 +658,12 @@
       font-weight: 700;
       box-shadow: inset 0 2px 4px rgba(26, 29, 33, 0.06);
       gap: 6px;
+      min-height: 36px;
+      transition: background 0.15s ease;
+    }
+
+    .concepto-item:hover {
+      background: #e8ebef;
     }
 
     .concepto-item .concepto-nombre {
@@ -671,6 +675,15 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 5px;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+
+    .concepto-item .concepto-nombre:hover {
+      background: rgba(26, 29, 33, 0.06);
     }
 
     .concepto-item .concepto-nombre::before {
@@ -684,6 +697,15 @@
       font-weight: 900;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 5px;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+
+    .concepto-item .concepto-monto:hover {
+      background: rgba(197, 48, 48, 0.1);
     }
 
     .concepto-item .btn-quitar-concepto {
@@ -704,6 +726,33 @@
     .concepto-item .btn-quitar-concepto:hover {
       background: rgba(197, 48, 48, 0.15);
       color: var(--rojo-apagado);
+    }
+
+    /* Input inline para editar concepto o monto */
+    .concepto-inline-input {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.8rem;
+      border: 2px solid var(--azul-acero);
+      border-radius: 6px;
+      padding: 2px 6px;
+      outline: none;
+      background: var(--blanco);
+      color: var(--texto);
+      min-width: 70px;
+      max-width: 140px;
+    }
+
+    .concepto-inline-input.monto {
+      color: var(--rojo-apagado);
+      text-align: right;
+      max-width: 90px;
+      min-width: 60px;
+    }
+
+    .concepto-inline-input:focus {
+      border-color: var(--azul-acero);
+      box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.2);
     }
 
     .concepto-empty {
@@ -1221,14 +1270,11 @@
     .hidden { display: none !important; }
 
     /* ===== RESPONSIVE ===== */
-
-    /* Tablet */
     @media (max-width: 900px) {
       .app-wrapper { max-width: 100%; }
       .lista-wrapper { max-height: min(380px, 45vh); }
     }
 
-    /* Móvil */
     @media (max-width: 600px) {
       body { padding: 14px 10px; }
       .container, .proyectos-home { border-radius: 22px; }
@@ -1250,7 +1296,6 @@
       .header-text h2 { font-size: 1rem; }
     }
 
-    /* Móvil pequeño */
     @media (max-width: 380px) {
       body { padding: 10px 8px; }
       .brand-name { font-size: 1.2rem; }
@@ -1261,13 +1306,11 @@
       .modal-botones button { flex: 1 1 100%; }
     }
 
-    /* Pantallas grandes (PC) */
     @media (min-width: 1200px) {
       .app-wrapper { max-width: 900px; }
       .lista-wrapper { max-height: 480px; }
     }
 
-    /* Reducción de movimiento */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1297,7 +1340,6 @@
 
     <div class="tabs-bar" id="tabsBar"></div>
 
-    <!-- VISTA HOME -->
     <div class="proyectos-home" id="vistaHome">
       <div class="home-header">
         <h2>📁 Proyectos</h2>
@@ -1309,7 +1351,6 @@
       </div>
     </div>
 
-    <!-- VISTA DETALLE -->
     <div class="container hidden" id="vistaDetalle">
       <div class="header">
         <div class="header-text">
@@ -1340,7 +1381,6 @@
     <div class="footer">By Pablo Ojeda</div>
   </div>
 
-  <!-- MODAL GENÉRICO -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <div class="modal-icon-wrap">
@@ -1358,7 +1398,7 @@
 
   <script>
     const PASSWORD = 'ControlInterno2026';
-    const STORAGE_KEY = 'pagapp_proyectos_v6';
+    const STORAGE_KEY = 'pagapp_proyectos_v7';
 
     let proyectos = [];
     let proyectoActivoId = null;
@@ -1384,6 +1424,73 @@
     function getProyectoActivo() { return proyectos.find(p => p.id === proyectoActivoId); }
     function generarId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
 
+    // ===== UTILIDAD: SOLO NÚMEROS EN MONTOS =====
+    /**
+     * Filtra la entrada para que solo contenga dígitos y un único punto decimal.
+     * Limita a 2 decimales. Devuelve el string limpio.
+     */
+    function filtrarMonto(valor) {
+      if (valor === null || valor === undefined) return '';
+      let v = String(valor);
+
+      // Eliminar todo lo que no sea dígito o punto
+      v = v.replace(/[^0-9.]/g, '');
+
+      // Solo un punto decimal
+      const partes = v.split('.');
+      if (partes.length > 2) {
+        v = partes[0] + '.' + partes.slice(1).join('');
+      }
+
+      // Limitar a 2 decimales
+      if (v.includes('.')) {
+        const [ent, dec] = v.split('.');
+        v = ent + '.' + dec.slice(0, 2);
+      }
+
+      return v;
+    }
+
+    /**
+     * Aplica el filtro a un input en tiempo real.
+     */
+    function aplicarFiltroMontoInput(input) {
+      input.addEventListener('input', () => {
+        const cursorPos = input.selectionStart;
+        const antes = input.value;
+        const limpio = filtrarMonto(antes);
+        if (limpio !== antes) {
+          input.value = limpio;
+          // Reposicionar cursor
+          const diff = antes.length - limpio.length;
+          const nuevaPos = Math.max(0, cursorPos - diff);
+          try { input.setSelectionRange(nuevaPos, nuevaPos); } catch (e) {}
+        }
+      });
+      input.addEventListener('keypress', (e) => {
+        const char = String.fromCharCode(e.which);
+        // Permitir solo dígitos y punto
+        if (!/[0-9.]/.test(char)) {
+          e.preventDefault();
+          return;
+        }
+        // Permitir solo un punto
+        if (char === '.' && input.value.includes('.')) {
+          e.preventDefault();
+        }
+      });
+      // Bloquear pegado de texto no numérico
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const texto = (e.clipboardData || window.clipboardData).getData('text');
+        const limpio = filtrarMonto(texto);
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const nuevo = input.value.slice(0, start) + limpio + input.value.slice(end);
+        input.value = filtrarMonto(nuevo);
+      });
+    }
+
     // ===== ANIMACIONES =====
     const animLayer = document.getElementById('animLayer');
 
@@ -1400,6 +1507,7 @@
         calcular:  { emojis: ['🧮', '📊', '💡', '✨'],        count: 12, anim: 'burstCenter', duration: 1300 },
         resetear:  { emojis: ['↺', '🔄', '✨'],              count: 10, anim: 'spinAround', duration: 1200 },
         whatsapp:  { emojis: ['✈️', '📤', '📨'],              count: 10, anim: 'flyAway',   duration: 1600 },
+        editar:    { emojis: ['✏️', '📝', '✨'],              count: 10, anim: 'burstCenter', duration: 1000 },
       };
 
       const c = config[tipo] || config.exito;
@@ -1467,6 +1575,13 @@
           modalInput.type = opts.inputType || 'text';
           modalInput.placeholder = opts.placeholder || '';
           modalInput.value = opts.valorInput || '';
+          if (opts.inputType === 'number') {
+            // aplicar filtro al input del modal
+            if (!modalInput.dataset.filtroAplicado) {
+              aplicarFiltroMontoInput(modalInput);
+              modalInput.dataset.filtroAplicado = '1';
+            }
+          }
         } else {
           modalInput.classList.add('hidden');
         }
@@ -1967,6 +2082,84 @@
       lanzarAnimacion('eliminar');
     }
 
+    // ===== EDITAR CONCEPTO (nombre) INLINE =====
+    function editarNombreConcepto(personaIndex, conceptoIndex, elemento) {
+      const p = getProyectoActivo();
+      if (!p) return;
+      const c = p.personas[personaIndex].conceptos[conceptoIndex];
+      if (!c) return;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'concepto-inline-input';
+      input.value = c.nombre;
+
+      const terminar = (guardarCambio) => {
+        if (guardarCambio) {
+          const nuevoNombre = input.value.trim();
+          if (nuevoNombre && nuevoNombre !== c.nombre) {
+            c.nombre = nuevoNombre;
+            guardar();
+            invalidarResultado();
+            lanzarAnimacion('editar');
+          }
+        }
+        renderizar();
+      };
+
+      input.addEventListener('blur', () => terminar(true));
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); terminar(true); }
+        if (e.key === 'Escape') { e.preventDefault(); terminar(false); }
+      });
+
+      elemento.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
+    // ===== EDITAR MONTO INLINE =====
+    function editarMontoConcepto(personaIndex, conceptoIndex, elemento) {
+      const p = getProyectoActivo();
+      if (!p) return;
+      const c = p.personas[personaIndex].conceptos[conceptoIndex];
+      if (!c) return;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.inputMode = 'decimal';
+      input.className = 'concepto-inline-input monto';
+      input.value = String(c.monto);
+
+      // Aplicar filtro numérico en tiempo real
+      aplicarFiltroMontoInput(input);
+
+      const terminar = (guardarCambio) => {
+        if (guardarCambio) {
+          const nuevoMonto = parseFloat(input.value);
+          if (!isNaN(nuevoMonto) && nuevoMonto >= 0 && nuevoMonto !== c.monto) {
+            c.monto = nuevoMonto;
+            guardar();
+            invalidarResultado();
+            lanzarAnimacion('editar');
+          } else if (isNaN(nuevoMonto) || nuevoMonto < 0) {
+            // monto inválido: no guardar
+          }
+        }
+        renderizar();
+      };
+
+      input.addEventListener('blur', () => terminar(true));
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); terminar(true); }
+        if (e.key === 'Escape') { e.preventDefault(); terminar(false); }
+      });
+
+      elemento.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
     function subtotalPersona(persona) {
       return persona.conceptos.reduce((acc, c) => acc + c.monto, 0);
     }
@@ -2016,12 +2209,47 @@
             const item = document.createElement('div');
             item.className = 'concepto-item';
             item.innerHTML = `
-              <span class="concepto-nombre">${c.nombre}</span>
+              <span class="concepto-nombre" title="Doble clic para editar">${c.nombre}</span>
               <span>
-                <span class="concepto-monto">$${c.monto.toFixed(2)}</span>
+                <span class="concepto-monto" title="Doble clic para editar">$${c.monto.toFixed(2)}</span>
                 <button class="btn-quitar-concepto" title="Quitar concepto">✕</button>
               </span>
             `;
+
+            // Doble clic / doble tap en NOMBRE
+            const nombreSpan = item.querySelector('.concepto-nombre');
+            nombreSpan.addEventListener('dblclick', (e) => {
+              e.stopPropagation();
+              editarNombreConcepto(i, j, nombreSpan);
+            });
+            let lastTapNombre = 0;
+            nombreSpan.addEventListener('touchend', (e) => {
+              const now = Date.now();
+              if (now - lastTapNombre < 300) {
+                e.preventDefault();
+                e.stopPropagation();
+                editarNombreConcepto(i, j, nombreSpan);
+              }
+              lastTapNombre = now;
+            });
+
+            // Doble clic / doble tap en MONTO
+            const montoSpan = item.querySelector('.concepto-monto');
+            montoSpan.addEventListener('dblclick', (e) => {
+              e.stopPropagation();
+              editarMontoConcepto(i, j, montoSpan);
+            });
+            let lastTapMonto = 0;
+            montoSpan.addEventListener('touchend', (e) => {
+              const now = Date.now();
+              if (now - lastTapMonto < 300) {
+                e.preventDefault();
+                e.stopPropagation();
+                editarMontoConcepto(i, j, montoSpan);
+              }
+              lastTapMonto = now;
+            });
+
             item.querySelector('.btn-quitar-concepto').addEventListener('click', () => quitarConcepto(i, j));
             conceptosLista.appendChild(item);
           });
@@ -2032,7 +2260,7 @@
         inputRow.className = 'concepto-input-row';
         inputRow.innerHTML = `
           <input type="text" class="concepto-nombre-input" placeholder="Concepto (ej: agua)">
-          <input type="number" class="concepto-monto-input" placeholder="Monto" step="0.01" inputmode="decimal">
+          <input type="text" class="concepto-monto-input" placeholder="Monto" inputmode="decimal">
           <button class="btn-add-concepto">+ Añadir</button>
         `;
         card.appendChild(inputRow);
@@ -2040,6 +2268,9 @@
         const btnAdd = inputRow.querySelector('.btn-add-concepto');
         const nombreInp = inputRow.querySelector('.concepto-nombre-input');
         const montoInp = inputRow.querySelector('.concepto-monto-input');
+
+        // Aplicar filtro numérico al input de monto
+        aplicarFiltroMontoInput(montoInp);
 
         btnAdd.addEventListener('click', async () => {
           const ok = await agregarConcepto(i, nombreInp.value, montoInp.value);
@@ -2069,7 +2300,6 @@
         return;
       }
 
-      // ✅ Personas sin conceptos aportan $0 — NO se bloquea el cálculo
       const total = p.personas.reduce((acc, x) => acc + subtotalPersona(x), 0);
       const promedio = total / p.personas.length;
       let deudores = [], acreedores = [];
