@@ -260,6 +260,58 @@
       transform: translateY(-1px);
     }
 
+    /* Fila de importar/exportar */
+    .io-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-io {
+      flex: 1 1 140px;
+      padding: 13px 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: clamp(0.78rem, 1.7vw, 0.85rem);
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      min-height: 46px;
+      box-shadow:
+        0 5px 10px rgba(26, 29, 33, 0.12),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-io.exportar {
+      background: linear-gradient(145deg, var(--azul-acero-claro), var(--azul-acero));
+      color: var(--blanco);
+    }
+
+    .btn-io.importar {
+      background: linear-gradient(145deg, #48bb78, var(--verde-apagado));
+      color: var(--blanco);
+    }
+
+    .btn-io:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 16px rgba(26, 29, 33, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-io:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
     .proyectos-lista { display: flex; flex-direction: column; gap: 10px; }
 
     .proyecto-item {
@@ -763,7 +815,6 @@
       opacity: 0.7;
     }
 
-    /* Botón Agregar concepto (abre modal) */
     .btn-abrir-concepto {
       padding: 10px 14px;
       border: 2px dashed var(--azul-acero-claro);
@@ -1291,6 +1342,8 @@
       .lista-wrapper { max-height: min(340px, 42vh); }
       .header { flex-direction: row; }
       .header-text h2 { font-size: 1rem; }
+      .io-row { flex-direction: column; }
+      .btn-io { flex: 1 1 100%; }
     }
 
     @media (max-width: 380px) {
@@ -1344,6 +1397,10 @@
       </div>
       <div class="home-body">
         <button class="btn-crear-proyecto" onclick="abrirModalNuevoProyecto()">＋ Crear nuevo proyecto</button>
+        <div class="io-row">
+          <button class="btn-io importar" onclick="abrirSelectorImportar()">📥 Importar JSON</button>
+          <button class="btn-io exportar" onclick="exportarJSON()">📤 Exportar JSON</button>
+        </div>
         <div class="proyectos-lista" id="proyectosLista"></div>
       </div>
     </div>
@@ -1378,7 +1435,7 @@
     <div class="footer">By Pablo Ojeda</div>
   </div>
 
-  <!-- MODAL GENÉRICO (con soporte para 2 inputs) -->
+  <!-- MODAL GENÉRICO -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <div class="modal-icon-wrap">
@@ -1399,11 +1456,14 @@
     </div>
   </div>
 
+  <!-- INPUT OCULTO PARA IMPORTAR -->
+  <input type="file" id="fileInput" accept=".json,application/json" class="hidden">
+
   <div class="anim-layer" id="animLayer"></div>
 
   <script>
     const PASSWORD = 'ControlInterno2026';
-    const STORAGE_KEY = 'pagapp_proyectos_v8';
+    const STORAGE_KEY = 'pagapp_proyectos_v9';
 
     let proyectos = [];
     let proyectoActivoId = null;
@@ -1490,6 +1550,8 @@
         resetear:  { emojis: ['↺', '🔄', '✨'],              count: 10, anim: 'spinAround', duration: 1200 },
         whatsapp:  { emojis: ['✈️', '📤', '📨'],              count: 10, anim: 'flyAway',   duration: 1600 },
         editar:    { emojis: ['✏️', '📝', '✨'],              count: 10, anim: 'burstCenter', duration: 1000 },
+        exportar:  { emojis: ['📤', '💾', '📁', '✨'],        count: 12, anim: 'flyAway',   duration: 1500 },
+        importar:  { emojis: ['📥', '📂', '✨', '🎉'],        count: 12, anim: 'riseUp',    duration: 1500 },
       };
 
       const c = config[tipo] || config.exito;
@@ -1545,16 +1607,6 @@
 
     let modalResolve = null;
 
-    /**
-     * opts:
-     *  - iconoTipo, icono, titulo, mensaje
-     *  - input: bool — muestra input 1
-     *  - inputType: 'text' | 'password' | 'number'
-     *  - valorInput, placeholder, label1
-     *  - input2: bool — muestra input 2
-     *  - input2Type, valorInput2, placeholder2, label2
-     *  - botones: [{texto, tipo, valor, estilo}]
-     */
     function mostrarModal(opts) {
       return new Promise((resolve) => {
         modalResolve = resolve;
@@ -1567,7 +1619,6 @@
         modalMensaje.innerHTML = opts.mensaje || '';
         modalMensaje.style.display = opts.mensaje ? 'block' : 'none';
 
-        // Input 1
         if (opts.input) {
           modalCampo1.classList.remove('hidden');
           modalInput.classList.remove('hidden');
@@ -1586,7 +1637,6 @@
           modalInput.classList.add('hidden');
         }
 
-        // Input 2
         if (opts.input2) {
           modalCampo2.classList.remove('hidden');
           modalInput2.type = opts.input2Type || 'text';
@@ -1694,6 +1744,187 @@
         ]
       });
     }
+
+    // ===== IMPORTAR / EXPORTAR JSON =====
+    const fileInput = document.getElementById('fileInput');
+
+    function construirPayloadExport() {
+      return {
+        app: 'PagApp',
+        version: 1,
+        exportado: new Date().toISOString(),
+        proyectos: proyectos.map(p => ({
+          id: p.id,
+          nombre: p.nombre,
+          personas: (p.personas || []).map(x => ({
+            nombre: x.nombre,
+            conceptos: (x.conceptos || []).map(c => ({
+              nombre: c.nombre,
+              monto: c.monto
+            }))
+          }))
+        }))
+      };
+    }
+
+    function nombreArchivoSugerido() {
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoy.getDate()).padStart(2, '0');
+      return `pagapp-backup-${yyyy}-${mm}-${dd}.json`;
+    }
+
+    async function exportarJSON() {
+      if (proyectos.length === 0) {
+        await modalAlerta('Sin datos', 'No hay proyectos para exportar.', 'warning');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      const payload = construirPayloadExport();
+      const texto = JSON.stringify(payload, null, 2);
+      const nombreSugerido = nombreArchivoSugerido();
+
+      try {
+        // API moderna: cuadro de diálogo para elegir dónde guardar
+        if (window.showSaveFilePicker) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: nombreSugerido,
+            types: [{
+              description: 'Archivo JSON',
+              accept: { 'application/json': ['.json'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(texto);
+          await writable.close();
+          lanzarAnimacion('exportar');
+          await modalAlerta('Exportado', `Se guardó el archivo <b>${handle.name}</b> correctamente.`, 'success');
+        } else {
+          // Fallback: descarga automática
+          const blob = new Blob([texto], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = nombreSugerido;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          lanzarAnimacion('exportar');
+          await modalAlerta('Exportado', `Tu navegador no permite elegir la ubicación. Se descargó <b>${nombreSugerido}</b> en tu carpeta de descargas.`, 'success');
+        }
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          // El usuario canceló el diálogo: no hacer nada
+          return;
+        }
+        console.error(err);
+        await modalAlerta('Error al exportar', 'No se pudo guardar el archivo. Intenta de nuevo.', 'danger');
+        lanzarAnimacion('error');
+      }
+    }
+
+    function abrirSelectorImportar() {
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      let contenido = null;
+      try {
+        const texto = await file.text();
+        contenido = JSON.parse(texto);
+      } catch (err) {
+        await modalAlerta('Archivo inválido', 'El archivo no es un JSON válido.', 'danger');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      // Validar estructura
+      if (!contenido || !Array.isArray(contenido.proyectos)) {
+        await modalAlerta('Formato incorrecto', 'El JSON no tiene el formato esperado de PagApp.', 'danger');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      const proyectosImportados = contenido.proyectos
+        .filter(p => p && typeof p === 'object' && typeof p.nombre === 'string')
+        .map(p => ({
+          id: generarId(),
+          nombre: String(p.nombre).trim() || 'Proyecto sin nombre',
+          personas: Array.isArray(p.personas)
+            ? p.personas
+                .filter(x => x && typeof x === 'object' && typeof x.nombre === 'string')
+                .map(x => ({
+                  nombre: String(x.nombre).trim() || 'Sin nombre',
+                  conceptos: Array.isArray(x.conceptos)
+                    ? x.conceptos
+                        .filter(c => c && typeof c === 'object')
+                        .map(c => ({
+                          nombre: String(c.nombre || '').trim() || 'Concepto',
+                          monto: Number.isFinite(Number(c.monto)) ? Number(c.monto) : 0
+                        }))
+                    : []
+                }))
+            : []
+        }));
+
+      if (proyectosImportados.length === 0) {
+        await modalAlerta('Sin proyectos', 'El archivo no contiene proyectos válidos.', 'warning');
+        lanzarAnimacion('error');
+        return;
+      }
+
+      // Preguntar si reemplazar o fusionar
+      const res = await mostrarModal({
+        iconoTipo: 'info',
+        icono: '📥',
+        titulo: 'Importar proyectos',
+        mensaje: `Se encontraron <b>${proyectosImportados.length}</b> proyecto(s) en el archivo.<br><br>¿Qué deseas hacer con los proyectos actuales?`,
+        botones: [
+          { texto: 'Cancelar', tipo: 'cancelar', valor: 'cancelar' },
+          { texto: 'Fusionar', tipo: 'confirmar', valor: 'fusionar', estilo: 'exito' },
+          { texto: 'Reemplazar todo', tipo: 'confirmar', valor: 'reemplazar', estilo: 'peligro' }
+        ]
+      });
+
+      if (!res.confirmado || res.confirmado === 'cancelar') return;
+
+      if (res.confirmado === 'reemplazar') {
+        proyectos = proyectosImportados;
+      } else {
+        // Fusionar: si un proyecto tiene el mismo nombre, se añade un sufijo
+        const nombresExistentes = new Set(proyectos.map(p => p.nombre.toLowerCase()));
+        proyectosImportados.forEach(p => {
+          let nombreFinal = p.nombre;
+          let contador = 2;
+          while (nombresExistentes.has(nombreFinal.toLowerCase())) {
+            nombreFinal = `${p.nombre} (${contador})`;
+            contador++;
+          }
+          nombresExistentes.add(nombreFinal.toLowerCase());
+          p.nombre = nombreFinal;
+          proyectos.push(p);
+        });
+      }
+
+      guardar();
+      proyectoActivoId = null;
+      hayResultado = false;
+      renderizarTabs();
+      renderizarVista();
+      lanzarAnimacion('importar');
+      await modalAlerta(
+        'Importación exitosa',
+        `Se importaron <b>${proyectosImportados.length}</b> proyecto(s) correctamente.`,
+        'success'
+      );
+    });
 
     // ===== LÓGICA =====
     function actualizarBotonAccion() {
@@ -1854,7 +2085,7 @@
           <div class="empty-proyectos">
             <span class="emoji">📂</span>
             No hay proyectos todavía.<br>
-            Crea uno para comenzar.
+            Crea uno o importa un JSON.
           </div>
         `;
         return;
@@ -2060,7 +2291,6 @@
       lanzarAnimacion('eliminar');
     }
 
-    // ===== ABRIR MODAL PARA AGREGAR CONCEPTO =====
     async function abrirModalAgregarConcepto(personaIndex) {
       const p = getProyectoActivo();
       if (!p) return;
@@ -2124,7 +2354,6 @@
       lanzarAnimacion('eliminar');
     }
 
-    // ===== EDITAR INLINE =====
     function editarNombreConcepto(personaIndex, conceptoIndex, elemento) {
       const p = getProyectoActivo();
       if (!p) return;
@@ -2291,7 +2520,6 @@
         }
         card.appendChild(conceptosLista);
 
-        // Botón para abrir modal de agregar concepto
         const btnAbrir = document.createElement('button');
         btnAbrir.className = 'btn-abrir-concepto';
         btnAbrir.innerHTML = '＋ Agregar concepto';
