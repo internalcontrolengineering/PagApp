@@ -1699,8 +1699,24 @@
     }
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('activo')) {
+      if (!modalOverlay.classList.contains('activo')) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
         cerrarModalConCancelar();
+        return;
+      }
+
+      // Enter confirma el modal (contraseña, nuevo proyecto, conceptos, etc.)
+      if (e.key === 'Enter') {
+        const active = document.activeElement;
+        // No interferir si el usuario está escribiendo en un input de la página principal
+        if (active && active.tagName === 'INPUT' && active !== modalInput && active !== modalInput2) {
+          return;
+        }
+        e.preventDefault();
+        const confirmBtn = modalBotones.querySelector('button.btn-confirmar');
+        if (confirmBtn) confirmBtn.click();
       }
     });
     modalOverlay.addEventListener('click', (e) => {
